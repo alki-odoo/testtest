@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<report
+    	id="taxivoucher_report"
+    	string="Imprimer des lots de chèques"
+    	model="taxivoucherbatch"
+    	report_type="qweb-pdf"
+    	file="ride.report_taxivoucherbatch"
+    	name="ride.report_taxivoucherbatch"/>
+</odoo>

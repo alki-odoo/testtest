@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ride,access_ride,model_ride,base.group_user,1,1,1,1
+ride.access_taxivoucher,access_taxivoucher,ride.model_taxivoucher,base.group_user,1,1,1,1
+ride.access_taxivoucherbatch,access_taxivoucherbatch,ride.model_taxivoucherbatch,base.group_user,1,1,1,1

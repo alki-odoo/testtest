@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="bill_rides" model="ir.actions.server">
+	    <field name="name">Facturer les courses</field>
+            <field name="type">ir.actions.server</field>
+	        <field name="model_id" ref="model_ride"/>
+            <field name="binding_model_id" ref="model_ride"/>
+            <field name="state">code</field>
+            <field name="code">records.bill_rides()</field>
+    </record>
+    <record id="publish_rides_subscribers" model="ir.actions.server">
+		<field name="name">Publier courses adhérents</field>
+		<field name="type">ir.actions.server</field>
+		<field name="model_id" ref="model_ride"/>
+		<field name="binding_model_id" ref="model_ride"/>
+		<field name="state">code</field>
+		<field name="code">records.publish_rides_subscribers()</field>
+	</record>
+	<record id="purchase_rides" model="ir.actions.server">
+		<field name="name">Acheter les courses</field>
+		<field name="type">ir.actions.server</field>
+		<field name="model_id" ref="model_ride"/>
+		<field name="binding_model_id" ref="model_ride"/>
+		<field name="state">code</field>
+		<field name="code">records.purchase_rides()</field>
+	</record>
+	<record id="ride_billable_view_tree" model="ir.ui.view">
+		<field name="name">ride.tree</field>
+		<field name="model">ride</field>
+		<field name="arch" type="xml">
+			<tree string="Channel" editable="top">
+				<field name="ride_dt"/>
+				<field name="client_company_ref"/>
+				<field name="client_company_dpt_ref"/>
+				<field name="client_company_dpt_name"/>
+				<field name="client_internal_ref"/>
+				<field name="client_passengers"/>
+				<field name="origin"/>
+				<field name="destination"/>
+				<field name="price" readonly="1"/>
+				<field name="reviewed_price"/>
+				<field name="state"/>
+				<field name="ride_info"/>
+				<field name="incident_info"/>
+				<field name="billable"/>
+				<field name="billed"/>
+				<field name="client_id"/>
+				<field name="buyable"/>
+				<field name="published2subscriber" readonly="1"/>
+				<field name="bought"/>
+				<field name="subscriber_id"/>
+				<field name="subscriber_ref"/>
+				<field name="driver_ref"/>
+				<field name="driver_name"/>
+				<field name="taxi_ref"/>
+				<field name="ride_ref"/>
+				<field name="ishandycab"/>
+			</tree>
+		</field>
+	</record>
+	<record id="ride_STIB_view_tree" model="ir.ui.view">
+		<field name="name">ride.tree</field>
+		<field name="model">ride</field>
+		<field name="arch" type="xml">
+			<tree string="Channel" class="ride_ride_STIB_view_tree" editable="top" default_order="ops_date desc,ride_dt">
+				<field name="ops_date"/>
+				<field name="ride_dt"/>
+				<field name="client_passengers"/>
+				<field name="origin"/>
+				<field name="destination"/>
+				<field name="price" readonly="1"/>
+				<field name="reviewed_price"/>
+				<field name="final_comment"/>
+				<field name="state"/>
+				<field name="ride_info"/>
+				<field name="incident_info"/>
+				<field name="billable"/>
+				<field name="billed"/>
+				<field name="buyable"/>
+				<field name="published2subscriber" readonly="1"/>
+				<field name="bought"/>
+				<field name="subscriber_id"/>
+				<field name="subscriber_ref"/>
+				<field name="driver_ref"/>
+				<field name="driver_name"/>
+				<field name="taxi_ref"/>
+				<field name="ride_ref"/>
+			</tree>
+		</field>
+	</record>
+	
+	<record id="ride_voucher_view_tree" model="ir.ui.view">
+		<field name="name">ride.tree</field>
+		<field name="model">ride</field>
+		<field name="arch" type="xml">
+			<tree string="Channel" editable="top">
+				<field name="voucher_id"/>
+				<field name="client_id"/>
+				<field name="ride_dt"/>
+				<field name="reviewed_price"/>
+				<field name="subscriber_id"/>
+				<field name="taxi_ref"/>
+				<field name="ride_info"/>
+				<field name="state"/>
+				<field name="ride_ref" readonly="1"/>
+				<field name="billable"/>
+				<field name="billed"/>
+				<!--<field name="invoice"/>-->
+				<field name="buyable"/>
+				<field name="bought"/>
+				<!--<field name="purchase_order"/>-->
+				<field name="billing_type"/>
+				<field name="ishandycab"/>
+			</tree>
+		</field>
+	</record>
+	<record id="all_rides_view_tree" model="ir.ui.view">
+		<field name="name">ride.tree</field>
+		<field name="model">ride</field>
+		<field name="arch" type="xml">
+			<tree string="Channel" editable="top">
+				<field name="ride_dt"/>
+				<field name="ride_ref"/>
+				<field name="price" readonly="1"/>
+				<field name="reviewed_price"/>
+				<field name="state"/>
+				<field name="client_id"/>
+				<field name="billable"/>
+				<field name="billed"/>
+				<field name="subscriber_id"/>
+				<field name="buyable"/>
+				<field name="published2subscriber" readonly="1"/>
+				<field name="bought"/>
+				<field name="ishandycab"/>
+			</tree>
+		</field>
+	</record>
+	<record id="taxivoucher_view_tree" model="ir.ui.view">
+		<field name="name">taxivoucher.tree</field>
+		<field name="model">taxivoucher</field>
+		<field name="arch" type="xml">
+			<tree string="Channel" editable="top" multi_edit="1">
+				<!-- <button name="action_do_something" type="object" string="Do Something"/> -->
+				<field name="serial"/>
+				<field name="type"/>
+				<field name="client_id"/>
+				<field name="batch"/>
+				<field name="ride"/>
+				<field name="billable"/>
+				<field name="buyable"/>
+			</tree>
+		</field>
+	</record>
+	<record id="taxivoucherbatch_view_tree" model="ir.ui.view">
+		<field name="name">taxivoucherbatch.tree</field>
+		<field name="model">taxivoucherbatch</field>
+		<field name="arch" type="xml">
+			<tree string="Channel" editable="top">
+				<field name="client_id"/>
+				<field name="serial"/>
+				<field name="size"/>
+			</tree>
+		</field>
+	</record>
+<!--	<record id="ride_form" model="ir.ui.view">
+		<field name="name">ride.form</field>
+		<field name="model">ride</field>
+		<field name="arch" type="xml">
+			<form> 
+				<header>
+					<field name="state" widget="statusbar"
+					options="{'clickable': '1', 'fold_field': 'fold'}"/>
+					<button name="action_do_something" type="object" string="Do Something" class="oe_highlight"/>
+				</header> 
+				<sheet>
+					<field name="trip_reference" string="Référence course"/>
+				</sheet>
+			</form>
+		</field>
+	</record>-->
+	<record id="fact_ride_view_action" model="ir.actions.act_window">
+		<field name="name">Courses à facturer</field>
+		<field name="res_model">ride</field>
+		<field name="view_mode">tree,form,kanban</field>
+		<field name="view_id" ref="ride_billable_view_tree"/>
+		<field name="domain">[('billing_type', 'in', ['billable']),('client_id','not ilike','STIB')]</field>
+	</record>
+	<record id="STIB_ride_view_action" model="ir.actions.act_window">
+		<field name="name">Courses STIB</field>
+		<field name="res_model">ride</field>
+		<field name="view_mode">tree,form,kanban</field>
+		<field name="view_id" ref="ride_STIB_view_tree"/>
+		<field name="context">{'group_by':'ops_date:day'}</field>
+		<field name="domain">[('billing_type', 'in', ['billable']),('client_id','ilike','STIB')]</field>
+	</record>
+    <record id="vouch_ride_view_action" model="ir.actions.act_window">
+    	<field name="name">Courses via chèques</field>
+        <field name="res_model">ride</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="view_id" ref="ride_voucher_view_tree"/>
+        <field name="domain">[('billing_type', 'in', ['voucher']),('client_id','not ilike','STIB')]</field>
+    </record>
+    <record id="all_rides_view_action" model="ir.actions.act_window">
+    	<field name="name">Courses à facturer et via chèques</field>
+        <field name="res_model">ride</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="view_id" ref="all_rides_view_tree"/>
+        <field name="domain">[('billing_type', 'in', ['voucher','billable'])]</field>
+    </record>
+    <record id="taxivoucher_view_action" model="ir.actions.act_window">
+    	<field name="name">Chèques</field>
+        <field name="res_model">taxivoucher</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="view_id" ref="taxivoucher_view_tree"/>
+    </record>
+    <record id="taxivoucherbatch_view_action" model="ir.actions.act_window">
+    	<field name="name">Lots de Chèques</field>
+        <field name="res_model">taxivoucherbatch</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="view_id" ref="taxivoucherbatch_view_tree"/>
+    </record>
+</odoo>

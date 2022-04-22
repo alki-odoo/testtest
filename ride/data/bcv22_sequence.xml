@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+   <record id="bcv22_id_sequence" model="ir.sequence">
+		<field name="name">Sequence to number the Blue Cabs Vouchers layout 2022</field>
+		<field name="code">number_bcv22</field>
+		<field name="active">TRUE</field>
+		<field name="suffix">_BC22</field>
+		<field name="padding">7</field>
+	</record>
+</odoo>

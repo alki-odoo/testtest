@@ -1,0 +1,111 @@
+# -*- coding: utf-8 -*-
+
+from odoo import models, fields, api
+import pandas as pd
+
+class Ride(models.Model):
+	_name="ride"
+	_description="taxi rides"
+	
+	ride_reference=fields.Char(required=True)
+	state=fields.Selection(string="Statut",selection=[('downloaded','Téléchargée'),('verified','Vérifiée'),('billed','Facturée')])
+	ride_dt=fields.Datetime(required=True)
+	#currency_id=fields.Many2one('res.currency')
+	#price=fields.Monetary(string='Prix',currency_field=currency_id)
+	price=fields.Float()
+	billable=fields.Boolean(default=True,required=True)
+	driver_ID=fields.Integer(required=True)
+	driver_name=fields.Char()
+	subscriber_ID=fields.Integer(required=True)
+	subscriber_name=fields.Char()
+	taxi_ID=fields.Integer(required=True)
+	origin=fields.Char()
+	destination=fields.Char()
+	ride_info=fields.Text()
+	incident_info=fields.Text()
+	client_passengers=fields.Char()
+	client_company_ID=fields.Char(required=True)
+	client_company_dpt_ID=fields.Char(required=True)
+	client_company_dpt_name=fields.Char()
+	client_internal_ref=fields.Char()
+	
+	#To-do the tax should come from the product
+	#to-do check that all billable_clients and all subscribers ID's are being mapped to a partner
+	def bill_rides(self):
+		#get the list of distinct billable_clients
+		#retrieve their internal partner_id
+		#get the list of distinct subscribers
+		#retrieve their internal partner_id
+
+		billable_clients=set([record.client_company_ID for record in self])
+		subscribers=set([record.subscriber_ID for record in self])
+		
+		records=pd.DataFrame(columns=['client_company_ID','subscriber_ID','price'])
+		
+		for record in self:
+			records=records.append({'client_company_ID':record.client_company_ID,'subscriber_ID':record.subscriber_ID,'price':record.price})
+
+		
+
+
+		for client in []:
+		#for client in billable_clients:
+			billable_client_id=self.env['res.partner'].search([('billed_client_akostaxikey','=',client)])[0].id
+			invoice_line_ids=[]
+			for record in self:
+				if ((record.client_company_ID==client) & (record.billable) & (~(record.state=='billed'))):
+					invoice_line_ids.append(
+									(0,0,{'product_id':1,'name':record.ride_dt,'quantity':1,'tax_ids':[(6,0,[5])],'price_unit':record.price/1.06})
+								)
+					#record.state='billed'
+			move = self.env['account.move'].create({
+                                        'move_type': 'out_invoice',
+                                        'date': fields.Datetime.today(),
+                                        'partner_id': billable_client_id,
+                                        'invoice_date': fields.Datetime.today(),
+                                        #'currency_id': self.currency_data['currency'].id,
+                                        #'invoice_payment_term_id': self.pay_terms_a.id,
+                                        'invoice_line_ids': invoice_line_ids
+                                                })
+		for subscriber in []
+		#for subscriber in subscribers:
+			subscriber_id=self.env['res.partner'].search([('subscriber_ID','=',subscriber)])[0].id
+			purchase_order_lines=[]
+			for record in self:
+				if ((record.subscriber_ID==subscriber) & (record.billable) & (~(record.state=='billed'))):
+					purchase_order_lines.append(
+									(0,0,{'date_planned':fields.Datetime.today(),'product_id':1,'product_qty':1,
+										'tax_ids':[(6,0,[5])],
+										#'price_total':record.price})
+										'price_unit':record.price/1.06})
+								)
+			purchase_order = self.env['purchase.order'].create({
+							'partner_id': subscriber_id,
+							'order_line':purchase_order_lines
+								})
+		for item in []:
+		#for record in self:
+			if(record.billable & ~(record.state=='billed')):
+				billable_client_id=self.env['res.partner'].search([('billed_client_akostaxikey','=',record.client_company_ID)])[0].id
+				move = self.env['account.move'].create({
+					'move_type': 'out_invoice',
+					'date': fields.Datetime.today(),
+					'partner_id': billable_client_id,
+					'invoice_date': fields.Datetime.today(),
+					#'currency_id': self.currency_data['currency'].id,
+					#'invoice_payment_term_id': self.pay_terms_a.id,
+					'invoice_line_ids': [(0, 0, {
+									'product_id':1,
+									#'name':client,
+									'quantity':1,
+									'tax_ids': [(6, 0, [5])],
+									'price_unit': record.price/1.06})],
+						})
+			record.state='billed'
+			#return {'value':{},'warning':{'title':'warning','message':'Your message'}}
+			#return {'warning': {'title': 'Warning!','message': 'The warning text'}}
+
+	@api.onchange('price')
+	def onchange_price(self):
+		for record in self:
+			record.state='verified'

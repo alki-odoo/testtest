@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <template id="report_taxivoucherbatch_single">
+    <t t-name="ride.report_taxivoucherbatch_single">
+      <style type="text/css">
+              .page {
+          page-break-after: always;
+        }
+        .page:last-child {
+          page-break-after: avoid;
+        }
+        .voucher {
+          position:relative;
+          width:100%;
+          height:59.4mm;
+        }
+        .voucher_part {
+          position:absolute;
+        }
+        .voucher_info {
+          width:50mm;
+        }
+        .voucher_info_left {
+          left:0mm;
+        }
+        .client_info {
+          width:95mm;
+          left:65mm;
+        }
+        .voucher_info_right {
+          left:160mm;
+        }
+        .voucher_text {
+          position:relative;
+          text-align: center;
+          vertical-align: text-middle;
+          font-size:12px;
+        }
+        .info_client_text {
+          width:95mm;
+          height:25mm;
+          top:23mm;
+          <!--line-height:25mm;-->
+        }
+        .tobecompleted_text {
+          width:28.55mm;
+          height:8.5mm;
+          line-height:8.5mm;
+        }
+        .client_id {
+          top:6.5mm;
+        }
+        .serial {
+          top:30.5mm
+        }
+      </style>
+      <t t-foreach="doc.vouchers" t-as="voucher">
+        <div class="voucher">
+          <div class="voucher_part voucher_info voucher_info_left">
+            <div class="voucher_text tobecompleted_text client_id" style="left:15.5mm;"><t t-esc="doc.client_id.id"/></div>
+            <div class="voucher_text tobecompleted_text serial" style="left:15.5mm;"><t t-esc="voucher.serial"/></div>
+          </div>
+          <div class="voucher_part client_info">
+              <div class="voucher_text info_client_text">
+                <p>
+                  <t t-out="doc.client_id.name"/><br/>
+                  <t t-out="doc.client_id.street"/><br/>
+                  <t t-if="doc.client_id.street2" t-out="doc.client_id.street2"><br/></t>
+                  <t t-out="doc.client_id.zip"/> <t t-out="doc.client_id.city"/> (<t t-out="doc.client_id.country_id.code"/>)<br/>
+                  <t t-if="doc.client_id.vat" t-out="doc.client_id.vat"><br/></t>
+                </p>
+              </div>
+          </div>
+          <div class="voucher_part voucher_info voucher_info_right">
+            <div class="voucher_text tobecompleted_text client_id" style="left:17.25mm"><t t-esc="doc.client_id.id"/></div>
+            <div class="voucher_text tobecompleted_text serial" style="left:17.25mm"><t t-esc="voucher.serial"/></div>
+          </div>
+        </div>
+      </t>                
+    </t>
+  </template>
+  <template id="report_taxivoucherbatch">
+    <t t-name="ride.report_taxivoucherbatch">
+       <t t-call="web.html_container">
+         <t t-foreach="docs" t-as="doc">
+           <div class="page">
+             <t t-call="ride.report_taxivoucherbatch_single"/>
+           </div>
+         </t>
+      </t>
+    </t>
+  </template>
+</odoo>

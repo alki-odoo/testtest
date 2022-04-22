@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<menuitem id="root_menu" name="Taxi">
+		<menuitem id="ride_level_1_rides_menu" name="Courses">
+			<menuitem id="fact_ride_menu_action" action="fact_ride_view_action"/>
+			<menuitem id="STIB_ride_menu_action" action="STIB_ride_view_action"/>
+			<menuitem id="vouch_ride_menu_action" action="vouch_ride_view_action"/>
+		</menuitem>	
+		<menuitem id="ride_level_1_vouchers_menu" name="Chèques">
+			<menuitem id="taxivoucher_menu_action" action="taxivoucher_view_action"/>
+			<menuitem id="taxivoucherbatch_menu_action" action="taxivoucherbatch_view_action"/>
+		</menuitem>	
+		<menuitem id="ride_level_1_billing_menu" name="Facturation">
+			<menuitem id="allrides_menu_action" action="all_rides_view_action"/>
+		</menuitem>		
+	</menuitem>
+</odoo>

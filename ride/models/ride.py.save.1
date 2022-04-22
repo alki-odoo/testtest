@@ -1,0 +1,51 @@
+# -*- coding: utf-8 -*-
+
+from odoo import models, fields, api
+
+class Ride(models.Model):
+	_name="ride"
+	_description="taxi rides"
+	
+	ride_reference=fields.Char(required=True)
+	state=fields.Selection(string="Statut",selection=[('downloaded','Téléchargée'),('verified','Vérifiée'),('billed','Facturée')])
+	ride_dt=fields.Datetime(required=True)
+	#currency_id=fields.Many2one('res.currency')
+	#price=fields.Monetary(string='Prix',currency_field=currency_id)
+	price=fields.Float()
+	billable=fields.Boolean(default=True,required=True)
+	driver_ID=fields.Integer(required=True)
+	driver_name=fields.Char()
+	subscriber_ID=fields.Integer(required=True)
+	subscriber_name=fields.Char()
+	taxi_ID=fields.Integer(required=True)
+	origin=fields.Char(required=True)
+	destination=fields.Char(required=True)
+	ride_info=fields.Text()
+	incident_info=fields.Text()
+	client_passengers=fields.Char()
+	client_company_ID=fields.Char(required=True)
+	client_company_dpt_ID=fields.Char(required=True)
+	client_company_dpt_name=fields.Char()
+	client_internal_ref=fields.Char()
+	
+	def bill_rides(self):
+		move = self.env['account.move'].create({
+				'move_type': 'out_invoice',
+				'date': '2017-01-01',
+				'partner_id': 1,
+				'invoice_date': fields.Date.from_string('2021-10-29'),
+				#'currency_id': self.currency_data['currency'].id,
+				#'invoice_payment_term_id': self.pay_terms_a.id,
+				'invoice_line_ids': [(0, 0, {'name': '/', 'price_unit': 7500.0})],
+					})
+				#one should use tax id=5
+		for record in self:
+			if(record.billable):
+				record.state='billed'
+			#return {'value':{},'warning':{'title':'warning','message':'Your message'}}
+			#return {'warning': {'title': 'Warning!','message': 'The warning text'}}
+
+	@api.onchange('price')
+	def onchange_price(self):
+		for record in self:
+			record.state='verified'
