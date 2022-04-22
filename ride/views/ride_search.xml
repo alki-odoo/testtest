@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ride_search_view_search" model="ir.ui.view">
+        <field name="name">ride.search</field>
+        <field name="model">ride</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="client_company_ref"/>
+                <field name="ride_ref"/>
+                <field name="client_id"/>
+                <field name="subscriber_id"/>
+                <field name="driver_name"/>
+                <field name="client_passengers"/>
+                <field name="origin"/>
+                <field name="destination"/>
+                <field name="driver_ref"/>
+                <field name="taxi_ref"/>
+            </search>
+        </field>
+    </record>
+</odoo>

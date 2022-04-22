@@ -1,0 +1,151 @@
+# -*- coding: utf-8 -*-
+
+from odoo import models, fields, api
+
+import pandas as pd
+import logging
+
+class Ride(models.Model):
+	_name="ride"
+	_description="taxi rides"
+	
+	billing_type=fields.Selection(string='Type de service',selection=[('billable','A facturer'),('voucher','Chèque')],default='billable',required=True)
+	ride_reference=fields.Char(required=True)
+	state=fields.Selection(string="Statut",selection=[('downloaded','Téléchargée'),('checked','Vérifiée'),('billed','Facturée'),('to_check','A vérifier')])
+	ride_dt=fields.Datetime(required=True)
+	#currency_id=fields.Many2one('res.currency')
+	#price=fields.Monetary(string='Prix',currency_field=currency_id)
+	price=fields.Float()
+	billable=fields.Boolean(default=True,required=True)
+	billed=fields.Boolean(default=False,required=True)
+	invoice=fields.Many2one(comodel_name='account.move',domain=[('move_type','=','out_invoice')])
+	buyable=fields.Boolean(default=True,required=True)
+	bought=fields.Boolean(default=False,required=True)
+	purchase_order=fields.Many2one(comodel_name='purchase.order')
+	driver_ID=fields.Integer(required=True)
+	driver_name=fields.Char()
+	subscriber_ID=fields.Integer(required=True)
+	subscriber_name=fields.Char()
+	taxi_ID=fields.Integer(required=True)
+	origin=fields.Char()
+	destination=fields.Char()
+	ride_info=fields.Text()
+	incident_info=fields.Text()
+	client_passengers=fields.Char()
+	client_company_ID=fields.Char(required=True)
+	client_company_dpt_ID=fields.Char(required=True)
+	client_company_dpt_name=fields.Char()
+	client_internal_ref=fields.Char()
+	
+	#To-do the tax should come from the product
+	#to-do check that all billable_clients and all subscribers ID's are being mapped to a partner
+	def bill_rides(self):
+		#get the list of distinct billable_clients
+		#retrieve their internal partner_id
+		#get the list of distinct subscribers
+		#retrieve their internal partner_id
+
+		MYDEBUG=True
+		if(MYDEBUG):
+			logging.info('listing distinct partners')
+		billable_clients=set([record.client_company_ID for record in self])
+		subscribers=set([record.subscriber_ID for record in self])
+		if(MYDEBUG):
+			logging.info('-done')
+
+		records=pd.DataFrame(columns=['id','client_company_ID','client_company_dpt_name','subscriber_ID','price','billable','billed','buyable','bought','state','ride_dt','client_passengers','origin','destination','taxi_ID','ride_reference'])
+		
+		if(MYDEBUG):
+			logging.info('creating the pandas DataFrame')
+		for record in self:
+			records=records.append({	'id':record.id,
+							'client_company_ID':record.client_company_ID,
+							'client_company_dpt_name':record.client_company_dpt_name,
+							'subscriber_ID':record.subscriber_ID,
+							'price':record.price,
+							'billable':record.billable,
+							'billed':record.billed,
+							'buyable':record.buyable,
+							'bought':record.bought,
+							'state':record.state,
+							'ride_dt':record.ride_dt,
+							'client_passengers':record.client_passengers,
+							'origin':record.origin,
+							'destination':record.destination,
+							'taxi_ID':record.taxi_ID,
+							'ride_reference':record.ride_reference
+						},ignore_index=True)
+
+		if(MYDEBUG):
+			logging.info('-done')
+
+		if(MYDEBUG):
+			logging.info('creating clients invoices')
+
+		records.sort_values(by=['client_company_dpt_name','ride_dt'],inplace=True)
+
+		for client in billable_clients:
+			billable_client_id=self.env['res.partner'].search([('billed_client_akostaxikey','=',client)])[0].id
+			invoice_line_ids=[]
+			if(MYDEBUG):
+				logging.info('*'+client)
+			for index,record in records[records['client_company_ID']==client].iterrows():
+				if ((record['billable']) & (~(record['billed']))):
+					invoice_line_ids.append(
+									(0,0,{	'product_id':1,
+										'name':'Département : '+record['client_company_dpt_name']+'\nDate : '+record['ride_dt'].strftime('%d-%m-%Y')+' - Réf. : '+record['ride_reference']+'\n'+'Passagers : '+record['client_passengers']+'\n'+'Orig. : '+record['origin']+'\n'+'Dest. : '+record['destination'],
+										'quantity':1,
+										'tax_ids':[(6,0,[71])],
+										'price_unit':record['price']})
+								)
+					if(MYDEBUG):
+						logging.info('The amount passed as parameter is: '+str(record['price']/1.06))
+					updated_record=self.env['ride'].search([('id','=',record['id'])])
+					updated_record.billed=True
+					#record.state='billed'
+			#move = self.env['account.move'].create({
+			updated_record.invoice = self.env['account.move'].create({
+                                        'move_type': 'out_invoice',
+                                        'date': fields.Datetime.today(),
+                                        'partner_id': billable_client_id,
+                                        'invoice_date': fields.Datetime.today(),
+                                        #'currency_id': self.currency_data['currency'].id,
+                                        #'invoice_payment_term_id': self.pay_terms_a.id,
+                                        'invoice_line_ids': invoice_line_ids
+                                                })
+		if(MYDEBUG):
+			logging.info('-done')
+
+		if(MYDEBUG):
+			logging.info('creating subscribers purchase orders')
+
+		records.sort_values(by=['taxi_ID','ride_dt'],inplace=True)
+
+		for subscriber in subscribers:
+			subscriber_id=self.env['res.partner'].search([('subscriber_ID','=',subscriber)])[0].id
+			purchase_order_lines=[]
+			if(MYDEBUG):
+				logging.info('*'+str(subscriber))
+			for index,record in records[records['subscriber_ID']==subscriber].iterrows():
+				if ((record['buyable']) & (~(record['bought']))):
+					purchase_order_lines.append(
+									(0,0,{'date_planned':fields.Datetime.today(),'product_id':1,'product_qty':1,
+										'name':'Voiture : '+str(record['taxi_ID'])+'\nDate : '+record['ride_dt'].strftime('%d-%m-%Y')+' - Réf. : '+record['ride_reference']+'\n'+'Orig. : '+record['origin']+'\n'+'Dest. : '+record['destination'],
+										'price_unit':record['price']})
+								)
+					updated_record=self.env['ride'].search([('id','=',record['id'])])
+					updated_record.bought=True
+			updated_record.purchase_order = self.env['purchase.order'].create({
+							'partner_id': subscriber_id,
+							'order_line':purchase_order_lines
+								})
+		if(MYDEBUG):
+			logging.info('-done')
+
+		for record in self:
+			if (record.billed & record.bought & (record.state=='downloaded' or record.state=='checked')):
+				record.state='billed'
+	@api.onchange('price')
+	def onchange_price(self):
+		for record in self:
+			record.state='checked'
